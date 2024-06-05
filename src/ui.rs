@@ -1,16 +1,16 @@
+#[cfg(target_arch = "wasm32")]
+use instant::Duration;
 use std::ops::RangeInclusive;
 #[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
-#[cfg(target_arch = "wasm32")]
-use instant::Duration;
 
 #[cfg(not(target_arch = "wasm32"))]
 use crate::renderer::DEFAULT_KERNEL_SIZE;
-use crate::{ SceneCamera, Split, WindowContext};
+use crate::{SceneCamera, Split, WindowContext};
 use cgmath::{Euler, Matrix3, Quaternion};
 #[cfg(not(target_arch = "wasm32"))]
 use egui::Vec2b;
-use egui::{emath::Numeric,  Align2, Color32, RichText, Vec2};
+use egui::{emath::Numeric, Align2, Color32, RichText, Vec2};
 #[cfg(not(target_arch = "wasm32"))]
 use egui_plot::{Legend, PlotPoints};
 
@@ -105,7 +105,6 @@ pub(crate) fn ui(state: &mut WindowContext) {
                 );
                 state.splatting_args.max_sh_deg = if dir_color { state.pc.sh_deg() } else { 0 };
 
-              
                 ui.end_row();
                 let enable_bg = !state.splatting_args.show_env_map && !state.display.has_env_map();
                 ui.add_enabled(enable_bg, egui::Label::new("Background Color"));
@@ -358,6 +357,21 @@ pub(crate) fn ui(state: &mut WindowContext) {
                     ui.label("T");
                     ui.end_row();
                 });
+        });
+
+    // FPS counter
+    egui::Area::new("fps_counter".into())
+        .movable(false)
+        .anchor(Align2::RIGHT_TOP, Vec2::new(-10., 10.))
+        .pivot(egui::Align2::RIGHT_TOP)
+        .show(ctx, |ui| {
+            ui.add(egui::Label::new(
+                egui::RichText::new(format!("{:.0}", state.fps))
+                    .heading()
+                    .color(egui::Color32::WHITE),
+            ));
+            ui.end_row();
+            ui.label("FPS")
         });
 
     if let Some(c) = new_camera {

@@ -481,6 +481,9 @@ impl WindowContext {
             // ui rendering
             self.ui_renderer.begin_frame(&self.window);
             ui::ui(self);
+            if let Some(multitouch) = self.ui_renderer.winit.egui_ctx().multi_touch(){
+                self.controller.process_scroll(multitouch.zoom_delta);
+            }
 
             let shapes = self.ui_renderer.end_frame(&self.window);
 
@@ -489,7 +492,6 @@ impl WindowContext {
                     width: output.texture.size().width,
                     height: output.texture.size().height,
                 },
-                self.scale_factor,
                 &self.wgpu_context.device,
                 &self.wgpu_context.queue,
                 &view_srgb,
@@ -734,7 +736,7 @@ pub async fn open_window<R: Read + Seek + Send + Sync + 'static>(
     let mut last = Instant::now();
     let mut last_touch_pos = Vector2::new(0., 0.);
 
-
+        
     event_loop.run(move |event,target| 
         
         match event {

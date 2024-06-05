@@ -51,7 +51,6 @@ impl EguiWGPU {
     pub fn paint(
         &mut self,
         size: PhysicalSize<u32>,
-        scale_factor: f32,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         color_attachment: &wgpu::TextureView,
@@ -60,7 +59,7 @@ impl EguiWGPU {
         let clipped_meshes = self
             .winit
             .egui_ctx()
-            .tessellate(output.shapes, scale_factor);
+            .tessellate(output.shapes, self.winit.egui_ctx().pixels_per_point());
 
         // let size = window.inner_size();l
         let screen_descriptor = egui_wgpu::ScreenDescriptor {
