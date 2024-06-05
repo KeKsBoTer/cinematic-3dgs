@@ -164,6 +164,7 @@ pub struct WindowContext {
     #[cfg(feature = "video")]
     cameras_save_path: String,
     stopwatch: Option<GPUStopwatch>,
+    half_res: bool,
 }
 
 impl WindowContext {
@@ -226,7 +227,6 @@ impl WindowContext {
         let renderer =
             GaussianRenderer::new(&device, &queue, render_format, pc.sh_deg(), pc.compressed())
                 .await;
-
         let aabb = pc.bbox();
         let aspect = size.width as f32 / size.height as f32;
         let view_camera = PerspectiveCamera::new(
@@ -259,7 +259,6 @@ impl WindowContext {
         } else {
             None
         };
-
         Ok(Self {
             wgpu_context,
             scale_factor: window.scale_factor() as f32,
@@ -301,6 +300,7 @@ impl WindowContext {
             scene_file_path: None,
 
             stopwatch,
+            half_res:false,
         })
     }
 
@@ -322,14 +322,18 @@ impl WindowContext {
         Ok(())
     }
 
-    fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>, scale_factor: Option<f32>) {
+    fn resize(&mut self, new_size:  winit::dpi::PhysicalSize<u32>, scale_factor: Option<f32>) {
         if new_size.width > 0 && new_size.height > 0 {
             self.config.width = new_size.width;
             self.config.height = new_size.height;
             self.surface
                 .configure(&self.wgpu_context.device, &self.config);
             self.display
-                .resize(&self.wgpu_context.device, new_size.width, new_size.height);
+                .resize(&self.wgpu_context.device, if self.half_res{new_size.width/2}else {
+                    new_size.width
+                }, if self.half_res{new_size.height/2}else {
+                    new_size.height
+                });
             self.splatting_args
                 .camera
                 .projection

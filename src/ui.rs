@@ -4,7 +4,6 @@ use std::ops::RangeInclusive;
 #[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
 
-#[cfg(not(target_arch = "wasm32"))]
 use crate::renderer::DEFAULT_KERNEL_SIZE;
 use crate::{SceneCamera, Split, WindowContext};
 use cgmath::{Euler, Matrix3, Quaternion};
@@ -84,7 +83,7 @@ pub(crate) fn ui(state: &mut WindowContext) {
                     ui.line(line);
                 });
         });
-
+    let mut resize = false;
     egui::Window::new("⚙ Render Settings").show(ctx, |ui| {
         egui::Grid::new("render_settings")
             .num_columns(2)
@@ -116,29 +115,31 @@ pub(crate) fn ui(state: &mut WindowContext) {
                     )
                 });
                 ui.end_row();
-                #[cfg(not(target_arch = "wasm32"))]
-                {
-                    ui.label("Dilation Kernel Size");
-                    optional_drag(
-                        ui,
-                        &mut state.splatting_args.kernel_size,
-                        Some(0.0..=10.0),
-                        Some(0.1),
-                        Some(
-                            state
-                                .pc
-                                .dilation_kernel_size()
-                                .unwrap_or(DEFAULT_KERNEL_SIZE),
-                        ),
-                    );
-                    ui.end_row();
-                    ui.label("Mip Splatting");
-                    optional_checkbox(
-                        ui,
-                        &mut state.splatting_args.mip_splatting,
-                        state.pc.mip_splatting().unwrap_or(false),
-                    );
-                    ui.end_row();
+                ui.label("Dilation Kernel Size");
+                optional_drag(
+                    ui,
+                    &mut state.splatting_args.kernel_size,
+                    Some(0.0..=10.0),
+                    Some(0.1),
+                    Some(
+                        state
+                            .pc
+                            .dilation_kernel_size()
+                            .unwrap_or(DEFAULT_KERNEL_SIZE),
+                    ),
+                );
+                ui.end_row();
+                ui.label("Mip Splatting");
+                optional_checkbox(
+                    ui,
+                    &mut state.splatting_args.mip_splatting,
+                    state.pc.mip_splatting().unwrap_or(false),
+                );
+                ui.end_row();
+
+                ui.label("Half Res");
+                if ui.checkbox(&mut state.half_res, "").changed() {
+                    resize = true
                 }
             });
     });
@@ -182,6 +183,7 @@ pub(crate) fn ui(state: &mut WindowContext) {
                             .unwrap_or("-".to_string()),
                     );
                     ui.end_row();
+
                     if let Some(path) = &state.pointcloud_file_path {
                         ui.strong("File:");
                         let text = path.to_string_lossy().to_string();
@@ -386,6 +388,15 @@ pub(crate) fn ui(state: &mut WindowContext) {
         } else {
             state.start_tracking_shot();
         }
+    }
+    if resize {
+        state.resize(
+            winit::dpi::PhysicalSize {
+                width: state.config.width,
+                height: state.config.height,
+            },
+            None,
+        );
     }
 }
 
