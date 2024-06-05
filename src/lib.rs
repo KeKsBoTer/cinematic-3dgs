@@ -709,7 +709,6 @@ pub async fn open_window<R: Read + Seek + Send + Sync + 'static>(
     state.pointcloud_file_path = pointcloud_file_path;
 
     if let Some(scene) = scene {
-        let init_camera = scene.cameras(None)[0].clone();
         state.set_scene(scene);
         state.set_scene_camera(0);
         state.scene_file_path = scene_file_path;
@@ -733,6 +732,8 @@ pub async fn open_window<R: Read + Seek + Send + Sync + 'static>(
         });
 
     let mut last = Instant::now();
+    let mut last_touch_pos = Vector2::new(0., 0.);
+
 
     event_loop.run(move |event,target| 
         
@@ -748,7 +749,7 @@ pub async fn open_window<R: Read + Seek + Send + Sync + 'static>(
                 scale_factor,
                 ..
             } => {
-                state.scale_factor = *scale_factor as f32;
+                state.resize(state.window.inner_size(), Some(*scale_factor as f32));
             }
             WindowEvent::CloseRequested => {log::info!("close!");target.exit()},
             WindowEvent::ModifiersChanged(m)=>{
@@ -832,6 +833,17 @@ pub async fn open_window<R: Read + Seek + Send + Sync + 'static>(
                     // All other errors (Outdated, Timeout) should be resolved by the next frame
                     Err(e) => println!("error: {:?}", e),
                 }
+            }
+            WindowEvent::Touch(touch) => {
+                if touch.phase == winit::event::TouchPhase::Moved {
+                    state.controller.left_mouse_pressed = true;
+                    state.controller.process_mouse(
+                        touch.location.x as f32 - last_touch_pos.x,
+                        touch.location.y as f32 - last_touch_pos.y,
+                    );
+                    state.controller.left_mouse_pressed = false;
+                }
+                last_touch_pos = Vector2::new(touch.location.x as f32, touch.location.y as f32);
             }
             _ => {}
         },
