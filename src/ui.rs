@@ -361,21 +361,6 @@ pub(crate) fn ui(state: &mut WindowContext) {
                 });
         });
 
-    // FPS counter
-    egui::Area::new("fps_counter".into())
-        .movable(false)
-        .anchor(Align2::RIGHT_TOP, Vec2::new(-10., 10.))
-        .pivot(egui::Align2::RIGHT_TOP)
-        .show(ctx, |ui| {
-            ui.add(egui::Label::new(
-                egui::RichText::new(format!("{:.0}", state.fps))
-                    .heading()
-                    .color(egui::Color32::WHITE),
-            ));
-            ui.end_row();
-            ui.label("FPS")
-        });
-
     if let Some(c) = new_camera {
         match c {
             SetCamera::ID(id) => state.set_scene_camera(id),
