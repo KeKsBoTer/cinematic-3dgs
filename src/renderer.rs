@@ -56,6 +56,7 @@ impl GaussianRenderer {
                 module: &shader,
                 entry_point: "vs_main",
                 buffers: &[],
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
@@ -65,6 +66,7 @@ impl GaussianRenderer {
                     blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             }),
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleStrip,
@@ -368,6 +370,7 @@ impl PreprocessPipeline {
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "preprocess",
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
         });
         Self(pipeline)
     }
@@ -402,7 +405,7 @@ impl PreprocessPipeline {
         pass.set_pipeline(&self.0);
         pass.set_bind_group(0, camera.bind_group(), &[]);
         pass.set_bind_group(1, pc.bind_group(), &[]);
-        pass.set_bind_group(2, &sort_bg, &[]);
+        pass.set_bind_group(2, sort_bg, &[]);
         pass.set_bind_group(3, render_settings.bind_group(), &[]);
 
         let wgs_x = (pc.num_points() as f32 / 256.0).ceil() as u32;
@@ -445,6 +448,7 @@ impl Display {
                 module: &shader,
                 entry_point: "vs_main",
                 buffers: &[],
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleStrip,
@@ -460,6 +464,7 @@ impl Display {
                     blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             }),
             multiview: None,
         });

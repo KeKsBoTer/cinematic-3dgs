@@ -234,30 +234,35 @@ impl GPURSSorter {
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "zero_histograms",
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
         });
         let histogram_p = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("calculate_histogram"),
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "calculate_histogram",
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
         });
         let prefix_p = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("prefix_histogram"),
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "prefix_histogram",
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
         });
         let scatter_even_p = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("scatter_even"),
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "scatter_even",
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
         });
         let scatter_odd_p = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("scatter_odd"),
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "scatter_odd",
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
         });
 
         return Self {
@@ -782,7 +787,7 @@ impl GPURSSorter {
         });
 
         pass.set_pipeline(&self.prefix_p);
-        pass.set_bind_group(0, &bind_group, &[]);
+        pass.set_bind_group(0, bind_group, &[]);
         pass.dispatch_workgroups(passes as u32, 1, 1);
     }
 

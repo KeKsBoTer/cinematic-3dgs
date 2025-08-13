@@ -62,7 +62,7 @@ pub(crate) fn ui(state: &mut WindowContext) {
                 .allow_boxed_zoom(false)
                 .allow_zoom(false)
                 .allow_scroll(false)
-                .y_axis_width(1)
+                .y_axis_min_width(1.)
                 .y_axis_label("ms")
                 .auto_bounds(Vec2b::TRUE)
                 .show_axes([false, true])
@@ -92,7 +92,8 @@ pub(crate) fn ui(state: &mut WindowContext) {
                 ui.label("Gaussian Scaling");
                 ui.add(
                     egui::DragValue::new(&mut state.splatting_args.gaussian_scaling)
-                        .clamp_range((1e-4)..=1.)
+                        .range((1e-4)..=1.)
+                        .clamp_to_range(true)
                         .speed(1e-2),
                 );
                 ui.end_row();
@@ -213,10 +214,11 @@ pub(crate) fn ui(state: &mut WindowContext) {
 
                             if let Some(c) = &mut state.current_view {
                                 ui.horizontal(|ui| {
-                                    let drag =
-                                        ui.add(egui::DragValue::new(c).clamp_range(
-                                            0..=(scene.num_cameras().saturating_sub(1)),
-                                        ));
+                                    let drag = ui.add(
+                                        egui::DragValue::new(c)
+                                            .range(0..=(scene.num_cameras().saturating_sub(1)))
+                                            .clamp_to_range(true),
+                                    );
                                     if drag.changed() {
                                         new_camera = Some(SetCamera::ID(*c));
                                     }
@@ -278,9 +280,8 @@ pub(crate) fn ui(state: &mut WindowContext) {
                                             )),
                                         );
 
-                                        let resp = ui.add(
-                                            egui::Label::new(c.img_name.clone()).truncate(true),
-                                        );
+                                        let resp =
+                                            ui.add(egui::Label::new(c.img_name.clone()).truncate());
                                         if let Some(view_id) = curr_view {
                                             if c.id == view_id {
                                                 resp.scroll_to_me(None);
@@ -428,7 +429,7 @@ fn optional_drag<T: Numeric>(
         })
     };
     if let Some(range) = range {
-        drag = drag.clamp_range(range);
+        drag = drag.range(range).clamp_to_range(true);
     }
     if let Some(speed) = speed {
         drag = drag.speed(speed);
